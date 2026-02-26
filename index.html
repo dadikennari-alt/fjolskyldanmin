@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talæfing FB - Fjölskyldan mín</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; background-color: #eef2f5; text-align: center; padding: 10px; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
+  .card { background: white; width: 100%; max-width: 850px; padding: 20px 30px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); border-top: 8px solid #004a99; box-sizing: border-box; }
+  .overall-progress { margin-bottom: 10px; font-size: 1em; color: #555; text-align: left; }
+  .progress-container { width: 100%; background: #e0e0e0; height: 10px; border-radius: 5px; margin-top: 5px; }
+  .progress-fill { height: 100%; width: 0%; background: #004a99; border-radius: 5px; transition: width 0.5s ease; }
+  h2 { color: #2c3e50; margin: 0 0 5px 0; font-size: 1.6em; }
+  .counter { color: #888; font-size: 1.1em; margin-bottom: 10px; display: block; font-weight: bold;}
+  .media-container { width: 100%; height: 300px; background-color: #f0f0f0; border-radius: 10px; margin-bottom: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+  .exercise-img { width: 100%; height: 100%; object-fit: cover; }
+  .phrase-box { background-color: #f8fbff; border: 2px solid #dce6f1; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
+  .target-text { font-size: 1.8em; color: #004a99; font-weight: bold; letter-spacing: 0.5px;}
+  .controls-wrapper { display: flex; gap: 20px; align-items: stretch; justify-content: space-between; }
+  .action-area { flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
+  .record-btn { background-color: #27ae60; color: white; border: none; padding: 15px; font-size: 1.2em; font-weight: bold; border-radius: 50px; cursor: pointer; transition: 0.2s; width: 100%; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3); }
+  .record-btn:hover { background-color: #219150; transform: translateY(-2px); }
+  .record-btn.recording { background-color: #e74c3c; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); } }
+  .nav-row { display: flex; justify-content: space-between; align-items: center; background: #f4f6f8; padding: 8px 12px; border-radius: 10px; }
+  .nav-btn { background-color: #fff; border: 1px solid #ccc; padding: 10px 15px; border-radius: 6px; cursor: pointer; color: #555; font-weight: bold; }
+  .result-area { flex: 1; background: #fdfdfe; padding: 15px; border-radius: 10px; border: 1px solid #ddd; text-align: left; }
+  .score-bar-bg { width: 100%; background: #e0e0e0; height: 12px; border-radius: 6px; overflow: hidden; margin: 5px 0; }
+  .score-bar-fill { height: 100%; width: 0%; background: #27ae60; transition: width 0.6s ease; }
+  .user-said { font-size: 1.4em; color: #2c3e50; font-style: italic; font-weight: bold; min-height: 40px; border-left: 5px solid #004a99; padding-left: 10px; margin-top: 5px; }
+  #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; flex-direction: column; }
+  #cert-wrap { background: white; padding: 40px; border: 10px double #004a99; width: 90%; max-width: 600px; text-align: center; border-radius: 10px; }
+  .student-name-input { font-size: 1.8em; border: none; border-bottom: 2px solid #004a99; text-align: center; width: 80%; margin: 20px 0; outline: none; background: #f4f4f4; padding: 8px;}
+</style>
+</head>
+<body>
+
+<div class="card">
+    <div class="overall-progress">
+        Árangur þinn: <span id="completed-count">0</span> af 10 setningum kláraðar
+        <div class="progress-container"><div id="overall-fill" class="progress-fill"></div></div>
+    </div>
+
+    <h2>Fjölskyldan mín</h2>
+    <span class="counter" id="counter">1 / 10</span>
+
+    <div class="media-container" id="media-content"></div>
+
+    <div class="phrase-box">
+        <span class="target-text" id="target">Hleð inn...</span>
+    </div>
+
+    <div class="controls-wrapper">
+        <div class="action-area">
+            <button class="record-btn" id="record-btn">🎙️ Ýttu hér og lestu</button>
+            <div class="nav-row">
+                <button class="nav-btn" onclick="move(-1)">⬅ Fyrri</button>
+                <img src="https://geymd.arnastofnun.is/ismus/data/e534627e-82ae-497a-8a52-22e8170a9f5a/filename.jpg" alt="FB Logo" style="height:30px;">
+                <button class="nav-btn" onclick="move(1)">Næsta ➡</button>
+            </div>
+        </div>
+
+        <div class="result-area">
+            <div id="accuracy" style="font-weight:bold; color:#004a99;">Nákvæmni: 0%</div>
+            <div class="score-bar-bg"><div id="score-fill" class="score-bar-fill"></div></div>
+            <div style="font-size: 0.8em; color: #888;">Þú sagðir:</div>
+            <div class="user-said" id="user-input"></div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-overlay">
+    <div id="cert-wrap">
+        <h1 style="font-family: serif; font-size: 3em; color: #004a99; margin:0;">SKÍRTEINI</h1>
+        <p>Þetta staðfestir að:</p>
+        <input type="text" id="student-name" class="student-name-input" placeholder="Skrifaðu nafnið þitt hér">
+        <p>hefur lokið talæfingunni:</p>
+        <h3 style="color: #333;">Fjölskyldan mín</h3>
+        <p id="cert-date"></p>
+        <div style="font-size: 3em;">🏆</div>
+    </div>
+    <div style="margin-top:20px;">
+        <button onclick="downloadCert()" style="padding:10px 20px; background:#004a99; color:white; border:none; border-radius:5px; cursor:pointer;">💾 Vista mynd</button>
+        <button onclick="closeModal()" style="padding:10px 20px; background:#95a5a6; color:white; border:none; border-radius:5px; cursor:pointer; margin-left:10px;">Loka</button>
+    </div>
+</div>
+
+<script>
+const exerciseData = [
+    { text: "Ég á fjölskyldu.", url: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800" },
+    { text: "Ég á pabba.", url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800" },
+    { text: "Ég á mömmu.", url: "https://images.unsplash.com/photo-1544717305-2782549b5136?w=800" },
+    { text: "Ég á eina systur.", url: "https://images.unsplash.com/photo-1548610762-6c6afe60908d?w=800" },
+    { text: "Ég á einn bróður.", url: "https://images.unsplash.com/photo-1621092044813-79198642787c?w=800" },
+    { text: "Ég á eitt barn.", url: "https://images.unsplash.com/photo-1510333300281-19340e3fd746?w=800" },
+    { text: "Ég á son og dóttur.", url: "https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=800" },
+    { text: "Ég bý með fjölskyldunni minni.", url: "https://images.unsplash.com/photo-1536640712247-c45474762884?w=800" },
+    { text: "Fjölskyldan mín er stór.", url: "https://images.unsplash.com/photo-1502086223501-7ea2cea4e0ff?w=800" },
+    { text: "Ég elska fjölskylduna mína.", url: "https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?w=800" }
+];
+
+let currentIndex = 0;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+
+if (recognition) {
+    recognition.lang = 'is-IS';
+    recognition.continuous = false;
+}
+
+window.onload = () => { updateUI(); calculateProgress(); };
+
+function updateUI() {
+    const curr = exerciseData[currentIndex];
+    document.getElementById('target').innerText = curr.text;
+    document.getElementById('counter').innerText = `${currentIndex + 1} / ${exerciseData.length}`;
+    document.getElementById('media-content').innerHTML = `<img class="exercise-img" src="${curr.url}" alt="Mynd">`;
+    
+    const savedScore = localStorage.getItem('family_score_' + currentIndex) || 0;
+    const savedText = localStorage.getItem('family_text_' + currentIndex) || "";
+    
+    document.getElementById('accuracy').innerText = `Nákvæmni: ${savedScore}%`;
+    document.getElementById('score-fill').style.width = savedScore + "%";
+    document.getElementById('user-input').innerText = savedText ? `„${savedText}“` : "";
+}
+
+function move(dir) {
+    currentIndex = Math.max(0, Math.min(exerciseData.length - 1, currentIndex + dir));
+    updateUI();
+}
+
+function compare(s1, s2) {
+    const clean = s => s.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"").trim();
+    const w1 = clean(s1).split(/\s+/);
+    const w2 = clean(s2).split(/\s+/);
+    let matches = 0;
+    w2.forEach(word => { if(w1.includes(word)) matches++; });
+    
+    let rawScore = (matches / w2.length) * 100;
+    const levels = [0, 25, 50, 75, 100];
+    return levels.reduce((prev, curr) => Math.abs(curr - rawScore) < Math.abs(prev - rawScore) ? curr : prev);
+}
+
+const recBtn = document.getElementById('record-btn');
+recBtn.onclick = () => {
+    if (!recognition) return alert("Vafri styður ekki talgreiningu.");
+    recognition.start();
+    recBtn.classList.add('recording');
+    recBtn.innerText = "Hlusta...";
+};
+
+if (recognition) {
+    recognition.onresult = (e) => {
+        const speech = e.results[0][0].transcript;
+        const score = compare(speech, exerciseData[currentIndex].text);
+        localStorage.setItem('family_score_' + currentIndex, score);
+        localStorage.setItem('family_text_' + currentIndex, speech);
+        updateUI();
+        calculateProgress();
+    };
+    recognition.onend = () => {
+        recBtn.classList.remove('recording');
+        recBtn.innerText = "🎙️ Ýttu hér og lestu";
+    };
+}
+
+function calculateProgress() {
+    let done = 0;
+    for(let i=0; i<exerciseData.length; i++) {
+        if((localStorage.getItem('family_score_'+i) || 0) >= 50) done++;
+    }
+    document.getElementById('completed-count').innerText = done;
+    document.getElementById('overall-fill').style.width = (done/exerciseData.length)*100 + "%";
+    if(done === exerciseData.length) {
+        document.getElementById('cert-date').innerText = new Date().toLocaleDateString('is-IS');
+        setTimeout(() => { document.getElementById('modal-overlay').style.display = 'flex'; }, 500);
+    }
+}
+
+async function downloadCert() {
+    const name = document.getElementById('student-name').value;
+    if(!name) return alert("Vinsamlegast skrifaðu nafn!");
+    const canvas = await html2canvas(document.getElementById('cert-wrap'), { scale: 2 });
+    const link = document.createElement('a');
+    link.download = `Skirteini-${name}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+}
+
+function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+</script>
+</body>
+</html>
