@@ -1,4 +1,4 @@
--<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="is">
 <head>
 <meta charset="UTF-8">
@@ -13,8 +13,8 @@
   .progress-fill { height: 100%; width: 0%; background: #004a99; border-radius: 5px; transition: width 0.5s ease; }
   h2 { color: #2c3e50; margin: 0 0 5px 0; font-size: 1.6em; }
   .counter { color: #888; font-size: 1.1em; margin-bottom: 10px; display: block; font-weight: bold;}
-  .media-container { width: 100%; height: 300px; background-color: #f0f0f0; border-radius: 10px; margin-bottom: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
-  .exercise-img { width: 100%; height: 100%; object-fit: cover; }
+  .media-container { width: 100%; height: 350px; background-color: #000; border-radius: 10px; margin-bottom: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+  .video-frame { width: 100%; height: 100%; border: none; }
   .phrase-box { background-color: #f8fbff; border: 2px solid #dce6f1; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
   .target-text { font-size: 1.8em; color: #004a99; font-weight: bold; letter-spacing: 0.5px;}
   .controls-wrapper { display: flex; gap: 20px; align-items: stretch; justify-content: space-between; }
@@ -31,7 +31,6 @@
   .user-said { font-size: 1.4em; color: #2c3e50; font-style: italic; font-weight: bold; min-height: 40px; border-left: 5px solid #004a99; padding-left: 10px; margin-top: 5px; }
   #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; flex-direction: column; }
   #cert-wrap { background: white; padding: 40px; border: 10px double #004a99; width: 90%; max-width: 600px; text-align: center; border-radius: 10px; }
-  .student-name-input { font-size: 1.8em; border: none; border-bottom: 2px solid #004a99; text-align: center; width: 80%; margin: 20px 0; outline: none; background: #f4f4f4; padding: 8px;}
 </style>
 </head>
 <body>
@@ -73,10 +72,8 @@
 <div id="modal-overlay">
     <div id="cert-wrap">
         <h1 style="font-family: serif; font-size: 3em; color: #004a99; margin:0;">SKÍRTEINI</h1>
-        <p>Þetta staðfestir að:</p>
-        <input type="text" id="student-name" class="student-name-input" placeholder="Skrifaðu nafnið þitt hér">
-        <p>hefur lokið talæfingunni:</p>
-        <h3 style="color: #333;">Fjölskyldan mín</h3>
+        <input type="text" id="student-name" style="font-size: 1.8em; border:none; border-bottom:2px solid #004a99; text-align:center; width:80%; margin:20px 0;" placeholder="Nafn nemanda">
+        <p>hefur lokið talæfingunni: <strong>Fjölskyldan mín</strong></p>
         <p id="cert-date"></p>
         <div style="font-size: 3em;">🏆</div>
     </div>
@@ -87,17 +84,18 @@
 </div>
 
 <script>
+// HÉR GETURÐU SETT INN ÞÍNA EIGIN YOUTUBE HLEKKI
 const exerciseData = [
     { text: "Ég á fjölskyldu.", url: "https://youtu.be/GJ4oavOH028" },
-    { text: "Ég á pabba.", url: "https://youtu.be/L48xWJWAdm8" },
+    { text: "Ég á pabba.", url: "https://youtu.be/CtTdWvDe_24" },
     { text: "Ég á mömmu.", url: "https://youtu.be/Vg5h5IPYXkk" },
-    { text: "Ég á systur.", url: "https://youtu.be/CtTdWvDe_24" },
-    { text: "Ég á bróður.", url: "https://images.unsplash.com/photo-1621092044813-79198642787c?w=800" },
-    { text: "Ég á ekki barn.", url: "https://images.unsplash.com/photo-1510333300281-19340e3fd746?w=800" },
-    { text: "Ég á heimili.", url: "https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=800" },
-    { text: "Ég bý með fjölskyldunni minni.", url: "https://images.unsplash.com/photo-1536640712247-c45474762884?w=800" },
-    { text: "Fjölskyldan mín er stór.", url: "https://images.unsplash.com/photo-1502086223501-7ea2cea4e0ff?w=800" },
-    { text: "Ég elska fjölskylduna mína.", url: "https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?w=800" }
+    { text: "Ég á eina systur.", url: "https://www.youtube.com/watch?v=318GCtqYrRE" },
+    { text: "Ég á einn bróður.", url: "https://www.youtube.com/watch?v=-uaABQd_FAk" },
+    { text: "Ég á eitt barn.", url: "https://www.youtube.com/watch?v=cF8ljzbOBVc" },
+    { text: "Ég á son og dóttur.", url: "https://www.youtube.com/watch?v=YSxBkmgtDzI" },
+    { text: "Ég bý með fjölskyldunni minni.", url: "https://www.youtube.com/watch?v=2w80XQN7juk" },
+    { text: "Fjölskyldan mín er stór.", url: "https://www.youtube.com/watch?v=318GCtqYrRE" },
+    { text: "Ég elska fjölskylduna mína.", url: "https://www.youtube.com/watch?v=-uaABQd_FAk" }
 ];
 
 let currentIndex = 0;
@@ -111,26 +109,34 @@ if (recognition) {
 
 window.onload = () => { updateUI(); calculateProgress(); };
 
-function formatSpeech(text) {
-    if (!text) return "";
-    let formatted = text.trim();
-    // Gera fyrsta staf stóran
-    formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
-    // Bæta við punkti ef hann vantar
-    if (!formatted.endsWith('.') && !formatted.endsWith('?') && !formatted.endsWith('!')) {
-        formatted += ".";
+// Fall sem breytir venjulegum hlekk í réttan YouTube embed hlekk
+function getYoutubeId(url) {
+    let videoId = "";
+    if (url.includes("v=")) {
+        videoId = url.split("v=")[1].split("&")[0];
+    } else if (url.includes("youtu.be/")) {
+        videoId = url.split("youtu.be/")[1];
     }
-    return formatted;
+    // autoplay=1 og mute=1 er öruggasta leiðin til að það spili sjálfkrafa
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&rel=0&enablejsapi=1`;
 }
 
 function updateUI() {
     const curr = exerciseData[currentIndex];
     document.getElementById('target').innerText = curr.text;
     document.getElementById('counter').innerText = `${currentIndex + 1} / ${exerciseData.length}`;
-    document.getElementById('media-content').innerHTML = `<img class="exercise-img" src="${curr.url}" alt="Mynd">`;
     
-    const savedScore = localStorage.getItem('fam_v2_score_' + currentIndex) || 0;
-    const savedText = localStorage.getItem('fam_v2_text_' + currentIndex) || "";
+    // Setja myndbandið inn
+    const embedUrl = getYoutubeId(curr.url);
+    document.getElementById('media-content').innerHTML = `
+        <iframe class="video-frame" 
+                src="${embedUrl}" 
+                allow="autoplay; encrypted-media" 
+                allowfullscreen>
+        </iframe>`;
+    
+    const savedScore = localStorage.getItem('fam_v3_score_' + currentIndex) || 0;
+    const savedText = localStorage.getItem('fam_v3_text_' + currentIndex) || "";
     
     document.getElementById('accuracy').innerText = `Nákvæmni: ${savedScore}%`;
     document.getElementById('score-fill').style.width = savedScore + "%";
@@ -142,13 +148,20 @@ function move(dir) {
     updateUI();
 }
 
+function formatSpeech(text) {
+    if (!text) return "";
+    let formatted = text.trim();
+    formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    if (!formatted.endsWith('.')) formatted += ".";
+    return formatted;
+}
+
 function compare(s1, s2) {
     const clean = s => s.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"").trim();
     const w1 = clean(s1).split(/\s+/);
     const w2 = clean(s2).split(/\s+/);
     let matches = 0;
     w2.forEach(word => { if(w1.includes(word)) matches++; });
-    
     let rawScore = (matches / w2.length) * 100;
     const levels = [0, 25, 50, 75, 100];
     return levels.reduce((prev, curr) => Math.abs(curr - rawScore) < Math.abs(prev - rawScore) ? curr : prev);
@@ -168,8 +181,8 @@ if (recognition) {
         const formatted = formatSpeech(rawSpeech);
         const score = compare(rawSpeech, exerciseData[currentIndex].text);
         
-        localStorage.setItem('fam_v2_score_' + currentIndex, score);
-        localStorage.setItem('fam_v2_text_' + currentIndex, formatted);
+        localStorage.setItem('fam_v3_score_' + currentIndex, score);
+        localStorage.setItem('fam_v3_text_' + currentIndex, formatted);
         updateUI();
         calculateProgress();
     };
@@ -182,7 +195,7 @@ if (recognition) {
 function calculateProgress() {
     let done = 0;
     for(let i=0; i<exerciseData.length; i++) {
-        if((localStorage.getItem('fam_v2_score_'+i) || 0) >= 50) done++;
+        if((localStorage.getItem('fam_v3_score_'+i) || 0) >= 50) done++;
     }
     document.getElementById('completed-count').innerText = done;
     document.getElementById('overall-fill').style.width = (done/exerciseData.length)*100 + "%";
@@ -193,11 +206,9 @@ function calculateProgress() {
 }
 
 async function downloadCert() {
-    const name = document.getElementById('student-name').value;
-    if(!name) return alert("Vinsamlegast skrifaðu nafn!");
     const canvas = await html2canvas(document.getElementById('cert-wrap'), { scale: 2 });
     const link = document.createElement('a');
-    link.download = `Skirteini-${name}.png`;
+    link.download = `Skirteini.png`;
     link.href = canvas.toDataURL();
     link.click();
 }
