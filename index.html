@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+-<!DOCTYPE html>
 <html lang="is">
 <head>
 <meta charset="UTF-8">
@@ -111,14 +111,26 @@ if (recognition) {
 
 window.onload = () => { updateUI(); calculateProgress(); };
 
+function formatSpeech(text) {
+    if (!text) return "";
+    let formatted = text.trim();
+    // Gera fyrsta staf stóran
+    formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    // Bæta við punkti ef hann vantar
+    if (!formatted.endsWith('.') && !formatted.endsWith('?') && !formatted.endsWith('!')) {
+        formatted += ".";
+    }
+    return formatted;
+}
+
 function updateUI() {
     const curr = exerciseData[currentIndex];
     document.getElementById('target').innerText = curr.text;
     document.getElementById('counter').innerText = `${currentIndex + 1} / ${exerciseData.length}`;
     document.getElementById('media-content').innerHTML = `<img class="exercise-img" src="${curr.url}" alt="Mynd">`;
     
-    const savedScore = localStorage.getItem('family_score_' + currentIndex) || 0;
-    const savedText = localStorage.getItem('family_text_' + currentIndex) || "";
+    const savedScore = localStorage.getItem('fam_v2_score_' + currentIndex) || 0;
+    const savedText = localStorage.getItem('fam_v2_text_' + currentIndex) || "";
     
     document.getElementById('accuracy').innerText = `Nákvæmni: ${savedScore}%`;
     document.getElementById('score-fill').style.width = savedScore + "%";
@@ -152,10 +164,12 @@ recBtn.onclick = () => {
 
 if (recognition) {
     recognition.onresult = (e) => {
-        const speech = e.results[0][0].transcript;
-        const score = compare(speech, exerciseData[currentIndex].text);
-        localStorage.setItem('family_score_' + currentIndex, score);
-        localStorage.setItem('family_text_' + currentIndex, speech);
+        const rawSpeech = e.results[0][0].transcript;
+        const formatted = formatSpeech(rawSpeech);
+        const score = compare(rawSpeech, exerciseData[currentIndex].text);
+        
+        localStorage.setItem('fam_v2_score_' + currentIndex, score);
+        localStorage.setItem('fam_v2_text_' + currentIndex, formatted);
         updateUI();
         calculateProgress();
     };
@@ -168,7 +182,7 @@ if (recognition) {
 function calculateProgress() {
     let done = 0;
     for(let i=0; i<exerciseData.length; i++) {
-        if((localStorage.getItem('family_score_'+i) || 0) >= 50) done++;
+        if((localStorage.getItem('fam_v2_score_'+i) || 0) >= 50) done++;
     }
     document.getElementById('completed-count').innerText = done;
     document.getElementById('overall-fill').style.width = (done/exerciseData.length)*100 + "%";
